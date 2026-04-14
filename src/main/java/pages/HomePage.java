@@ -30,7 +30,6 @@ public class HomePage {
         this.wait = new WebDriverWait(driver, Duration.ofSeconds(15));
     }
 
-
     // Кнопка-стрелка вопроса по индексу (0-7)
     private By faqQuestionButton(int index) {
         return By.id("accordion__heading-" + index);
@@ -41,7 +40,18 @@ public class HomePage {
         return By.xpath("//div[@id='accordion__panel-" + index + "']/p");
     }
 
-    // Методы
+
+    // Прокрутить страницу до элемента
+    private void scrollToElement(WebElement element) {
+        ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
+        try {
+            Thread.sleep(300);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+
 
     // Открыть главную страницу
     public void open() {
@@ -55,31 +65,42 @@ public class HomePage {
 
     // Нажать на нижнюю кнопку "Заказать" (с прокруткой до неё)
     public void clickBottomOrderButton() {
-        // Сначала находим кнопку
         WebElement button = driver.findElement(bottomOrderButton);
-        // Прокручиваем страницу до кнопки
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", button);
-        // Ждём, когда кнопка станет кликабельной, и нажимаем
         wait.until(ExpectedConditions.elementToBeClickable(bottomOrderButton)).click();
     }
 
     // Нажать на вопрос в разделе "Вопросы о важном"
     public void clickFaqQuestion(int index) {
-        // Ждём, пока вопрос станет доступен для клика
-        WebElement question = wait.until(ExpectedConditions.elementToBeClickable(faqQuestionButton(index)));
-        // Нажимаем на вопрос
-        question.click();
+        // Находим элемент вопроса
+        WebElement question = driver.findElement(faqQuestionButton(index));
+
+        // Прокручиваем до вопроса (чтобы он точно был виден)
+        scrollToElement(question);
+
+        // Ждём, пока вопрос станет кликабельным
+        wait.until(ExpectedConditions.elementToBeClickable(question));
+
+        // Пробуем нажать обычным способом
+        try {
+            question.click();
+        } catch (Exception e) {
+            // Если обычный клик не сработал - нажимаем через JavaScript
+            ((JavascriptExecutor) driver).executeScript("arguments[0].click();", question);
+        }
     }
 
     // Получить текст ответа на вопрос
     public String getFaqAnswer(int index) {
-        // Ждём, когда появится ответ, и сохраняем его
+        // Ждём, когда появится ответ
         WebElement answer = wait.until(ExpectedConditions.visibilityOfElementLocated(faqAnswerText(index)));
-        // Возвращаем текст ответа
+        // Прокручиваем к ответу
+        scrollToElement(answer);
+        // Возвращаем текст
         return answer.getText();
     }
 
-    // Проверить, загрузилась ли страница (по заголовку "Вопросы о важном")
+    // Проверить, загрузилась ли страница
     public boolean isPageLoaded() {
         return wait.until(ExpectedConditions.visibilityOfElementLocated(faqTitle)).isDisplayed();
     }

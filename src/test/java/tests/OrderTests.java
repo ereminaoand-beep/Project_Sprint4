@@ -62,15 +62,14 @@ public class OrderTests {
     // Что делаем перед каждым тестом
     @Before
     public void setUp() {
+        // Настраиваем ChromeDriver (автоматически скачивает нужную версию)
         WebDriverManager.chromedriver().setup();
+
+        // Открываем браузер
         driver = new ChromeDriver();
+
+        // Разворачиваем окно на весь экран
         driver.manage().window().maximize();
-
-        homePage = new HomePage(driver);
-        orderPage = new OrderPage(driver);
-
-        homePage.open();
-        homePage.isPageLoaded();
     }
 
     // Сам тест
@@ -95,6 +94,9 @@ public class OrderTests {
     // Закрыть браузер
     @After
     public void tearDown() {
+        // Закрываем браузер (обязательно!)
+        if (driver != null) {
             driver.quit();
+        }
     }
 }
