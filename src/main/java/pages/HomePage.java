@@ -44,11 +44,8 @@ public class HomePage {
     // Прокрутить страницу до элемента
     private void scrollToElement(WebElement element) {
         ((JavascriptExecutor) driver).executeScript("arguments[0].scrollIntoView(true);", element);
-        try {
-            Thread.sleep(300);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Ждём, пока элемент станет видимым после прокрутки
+        wait.until(ExpectedConditions.visibilityOf(element));
     }
 
 
